@@ -4,10 +4,17 @@ const database = require('../config/database');
 
 class TaskRepository {
     constructor() {
-        this.collection = database.getCollection('tasks');
+        this.collection = null;
+    }
+
+    async init() {
+        if (!this.collection) {
+            this.collection = database.getCollection('tasks');
+        }
     }
 
     async findAll(filters = {}) {
+        await this.init();
         try {
             const cursor = this.collection.find(filters).sort({ fechaCreacion: -1 });
             return await cursor.toArray();
@@ -17,6 +24,7 @@ class TaskRepository {
     }
 
     async findById(id) {
+        await this.init();
         try {
             if (!ObjectId.isValid(id)) {
                 return null;
@@ -28,6 +36,7 @@ class TaskRepository {
     }
 
     async create(taskData) {
+        await this.init();
         try {
             const task = new Task(taskData);
             const errors = task.validate();
@@ -44,12 +53,12 @@ class TaskRepository {
     }
 
     async update(id, taskData) {
+        await this.init();
         try {
             if (!ObjectId.isValid(id)) {
                 throw new Error('ID de tarea no válido');
             }
 
-            // Validar datos antes de actualizar
             const existingTask = await this.findById(id);
             if (!existingTask) {
                 throw new Error('Tarea no encontrada');
@@ -79,6 +88,7 @@ class TaskRepository {
     }
 
     async delete(id) {
+        await this.init();
         try {
             if (!ObjectId.isValid(id)) {
                 throw new Error('ID de tarea no válido');
@@ -97,6 +107,7 @@ class TaskRepository {
     }
 
     async updateStatus(id, newStatus) {
+        await this.init();
         try {
             if (!ObjectId.isValid(id)) {
                 throw new Error('ID de tarea no válido');
@@ -122,6 +133,7 @@ class TaskRepository {
     }
 
     async findByStatus(estado) {
+        await this.init();
         try {
             return await this.findAll({ estado });
         } catch (error) {

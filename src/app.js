@@ -1,60 +1,68 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const database = require('./config/database');
-const taskRoutes = require('./routes/taskRoutes');
-const errorHandler = require('./middleware/errorhandler');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const database = require("./config/database");
+const taskRoutes = require("./routes/taskRoutes");
+const errorHandler = require("./middleware/errorhandler");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
-// Conectar a la base de datos
+// ✅ Conectar a la base de datos local
 database.connect();
 
-// Middlewares
+// ✅ Middlewares
 app.use(cors({
-    origin: ['http://localhost:3001', 'http://127.0.0.1:3001', 'http://localhost:5500'],
-    credentials: true
+  origin: [
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "http://localhost:5501",
+    "http://127.0.0.1:5501"
+  ],
+  credentials: true
 }));
+
 app.use(express.json());
 
-// Logging de requests
+// ✅ Logging de requests (útil para depurar)
 app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-    next();
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
 });
 
-// Rutas
-app.use('/api', taskRoutes);
+// ✅ Rutas principales (corregido aquí 👇)
+app.use("/api/tasks", taskRoutes);
 
-// Ruta de salud
-app.get('/health', (req, res) => {
-    res.json({ 
-        status: 'OK', 
-        timestamp: new Date().toISOString(),
-        database: 'Connected'
-    });
+
+// ✅ Ruta de prueba /health
+app.get("/health", (req, res) => {
+  res.json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    database: "Connected",
+  });
 });
 
-// Manejo de rutas no encontradas
-app.use('*', (req, res) => {
-    res.status(404).json({ 
-        success: false,
-        error: 'Ruta no encontrada' 
-    });
+// ✅ Manejo de rutas inexistentes
+app.use("*", (req, res) => {
+  res.status(404).json({
+    success: false,
+    error: "Ruta no encontrada",
+  });
 });
 
-// Manejo de errores global
+// ✅ Middleware global de errores
 app.use(errorHandler);
 
-// Manejo de cierre graceful
-process.on('SIGINT', async () => {
-    console.log('\n🛑 Cerrando servidor...');
-    await database.disconnect();
-    process.exit(0);
+// ✅ Cierre controlado del servidor
+process.on("SIGINT", async () => {
+  console.log("\n🛑 Cerrando servidor...");
+  await database.disconnect();
+  process.exit(0);
 });
 
+// ✅ Iniciar servidor
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
-    console.log(`📊 Health check disponible en http://localhost:${PORT}/health`);
+  console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
+  console.log(`📊 Health check: http://localhost:${PORT}/health`);
 });
