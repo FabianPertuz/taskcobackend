@@ -41,4 +41,4 @@ Sistema de gestión de tareas colaborativas con Node.js, Express y MongoDB Drive
 
 ## 🎯 Frontend
 
-Repositorio del frontend: []
+Repositorio del frontend: https://github.com/Carlosvillamizar09/taskcofrontend
